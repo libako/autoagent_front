@@ -9,24 +9,51 @@ import {
   CheckCircle, 
   AlertTriangle,
   RotateCcw,
-  Clock
+  Clock,
+  MessageSquare,
+  Activity,
+  Bot,
+  Settings,
+  Play,
+  Cog,
+  Zap,
+  Package,
+  Search,
+  Plus,
+  Target,
+  FileText,
+  Circle
 } from 'lucide-react'
 import type { TraceEvent } from '@/types/domain'
 
 interface TraceViewerProps {
-  items: { kind: TraceEvent["kind"]; payload: any; at: string; idx?: number }[]
+  items: { 
+    eventId?: string;
+    kind: TraceEvent["kind"]; 
+    payload: any; 
+    at: string; 
+    idx?: number;
+    sessionId?: string;
+  }[]
 }
 
 export function TraceViewer({ items }: TraceViewerProps) {
+  // Debug: ver qué items estamos recibiendo
+  console.log('🔍 TraceViewer recibió items:', items);
+  console.log('🔍 Total de items:', items.length);
+  
   // Mostrar solo los tipos útiles
   const allowedKinds: TraceEvent["kind"][] = [
     'plan',
-    'tool_call',
+    'tool_call', 
     'observation',
     'summary',
     'error',
   ]
   const visibleItems = items.filter((it) => allowedKinds.includes(it.kind))
+  
+  console.log('🔍 Items visibles después del filtro:', visibleItems);
+  console.log('🔍 Total de items visibles:', visibleItems.length);
 
   const getTraceIcon = (kind: TraceEvent["kind"]) => {
     switch (kind) {
@@ -35,7 +62,24 @@ export function TraceViewer({ items }: TraceViewerProps) {
       case "observation": return <Eye className="h-4 w-4" />
       case "summary": return <CheckCircle className="h-4 w-4" />
       case "error": return <AlertTriangle className="h-4 w-4" />
-      default: return null
+      case "message_received": return <MessageSquare className="h-4 w-4" />
+      case "background_task_started": return <Activity className="h-4 w-4" />
+      case "agent_found": return <Bot className="h-4 w-4" />
+      case "orchestrator_resolved": return <Settings className="h-4 w-4" />
+      case "orchestrator_started": return <Play className="h-4 w-4" />
+      case "orchestrator_completed": return <CheckCircle className="h-4 w-4" />
+      case "kernel_factory_started": return <Cog className="h-4 w-4" />
+      case "kernel_config": return <Settings className="h-4 w-4" />
+      case "kernel_built": return <Wrench className="h-4 w-4" />
+      case "kernel_factory_completed": return <CheckCircle className="h-4 w-4" />
+      case "kernel_created": return <Zap className="h-4 w-4" />
+      case "tools_registration_started": return <Package className="h-4 w-4" />
+      case "tools_found": return <Search className="h-4 w-4" />
+      case "tool_registered": return <Plus className="h-4 w-4" />
+      case "tools_registration_completed": return <CheckCircle className="h-4 w-4" />
+      case "planning_started": return <Target className="h-4 w-4" />
+      case "summary_started": return <FileText className="h-4 w-4" />
+      default: return <Circle className="h-4 w-4" />
     }
   }
 
@@ -46,6 +90,23 @@ export function TraceViewer({ items }: TraceViewerProps) {
       case "observation": return "bg-green-100 text-green-800 border-green-200"
       case "summary": return "bg-emerald-100 text-emerald-800 border-emerald-200"
       case "error": return "bg-red-100 text-red-800 border-red-200"
+      case "message_received": return "bg-indigo-100 text-indigo-800 border-indigo-200"
+      case "background_task_started": return "bg-yellow-100 text-yellow-800 border-yellow-200"
+      case "agent_found": return "bg-cyan-100 text-cyan-800 border-cyan-200"
+      case "orchestrator_resolved": return "bg-slate-100 text-slate-800 border-slate-200"
+      case "orchestrator_started": return "bg-orange-100 text-orange-800 border-orange-200"
+      case "orchestrator_completed": return "bg-emerald-100 text-emerald-800 border-emerald-200"
+      case "kernel_factory_started": return "bg-violet-100 text-violet-800 border-violet-200"
+      case "kernel_config": return "bg-slate-100 text-slate-800 border-slate-200"
+      case "kernel_built": return "bg-purple-100 text-purple-800 border-purple-200"
+      case "kernel_factory_completed": return "bg-emerald-100 text-emerald-800 border-emerald-200"
+      case "kernel_created": return "bg-blue-100 text-blue-800 border-blue-200"
+      case "tools_registration_started": return "bg-pink-100 text-pink-800 border-pink-200"
+      case "tools_found": return "bg-amber-100 text-amber-800 border-amber-200"
+      case "tool_registered": return "bg-green-100 text-green-800 border-green-200"
+      case "tools_registration_completed": return "bg-emerald-100 text-emerald-800 border-emerald-200"
+      case "planning_started": return "bg-blue-100 text-blue-800 border-blue-200"
+      case "summary_started": return "bg-teal-100 text-teal-800 border-teal-200"
       default: return "bg-gray-100 text-gray-800 border-gray-200"
     }
   }
@@ -57,7 +118,52 @@ export function TraceViewer({ items }: TraceViewerProps) {
       case "observation": return "Observación"
       case "summary": return "Resumen"
       case "error": return "Error"
-      default: return ""
+      case "message_received": return "Mensaje Recibido"
+      case "background_task_started": return "Tarea Iniciada"
+      case "agent_found": return "Agente Encontrado"
+      case "orchestrator_resolved": return "Orquestador Resuelto"
+      case "orchestrator_started": return "Orquestador Iniciado"
+      case "orchestrator_completed": return "Orquestador Completado"
+      case "kernel_factory_started": return "Fábrica de Kernel Iniciada"
+      case "kernel_config": return "Configuración de Kernel"
+      case "kernel_built": return "Kernel Construido"
+      case "kernel_factory_completed": return "Fábrica de Kernel Completada"
+      case "kernel_created": return "Kernel Creado"
+      case "tools_registration_started": return "Registro de Herramientas Iniciado"
+      case "tools_found": return "Herramientas Encontradas"
+      case "tool_registered": return "Herramienta Registrada"
+      case "tools_registration_completed": return "Registro de Herramientas Completado"
+      case "planning_started": return "Planificación Iniciada"
+      case "summary_started": return "Resumen Iniciado"
+      default: return kind
+    }
+  }
+
+  const getTraceBorderColor = (kind: TraceEvent["kind"]) => {
+    switch (kind) {
+      case "plan": return "border-l-blue-500"
+      case "tool_call": return "border-l-purple-500"
+      case "observation": return "border-l-green-500"
+      case "summary": return "border-l-emerald-500"
+      case "error": return "border-l-red-500"
+      case "message_received": return "border-l-indigo-500"
+      case "background_task_started": return "border-l-yellow-500"
+      case "agent_found": return "border-l-cyan-500"
+      case "orchestrator_resolved": return "border-l-slate-500"
+      case "orchestrator_started": return "border-l-orange-500"
+      case "orchestrator_completed": return "border-l-emerald-500"
+      case "kernel_factory_started": return "border-l-violet-500"
+      case "kernel_config": return "border-l-slate-500"
+      case "kernel_built": return "border-l-purple-500"
+      case "kernel_factory_completed": return "border-l-emerald-500"
+      case "kernel_created": return "border-l-blue-500"
+      case "tools_registration_started": return "border-l-pink-500"
+      case "tools_found": return "border-l-amber-500"
+      case "tool_registered": return "border-l-green-500"
+      case "tools_registration_completed": return "border-l-emerald-500"
+      case "planning_started": return "border-l-blue-500"
+      case "summary_started": return "border-l-teal-500"
+      default: return "border-l-gray-500"
     }
   }
 
@@ -67,9 +173,9 @@ export function TraceViewer({ items }: TraceViewerProps) {
   }
 
   return (
-    <div className="h-full overflow-y-auto space-y-3 pr-2">
-      {visibleItems.slice().reverse().map((item, index) => (
-        <Card key={`${item.at}-${index}`} className="border-l-4 border-l-primary">
+    <div className="space-y-3 pr-2 pb-4 pl-4">
+             {visibleItems.slice().reverse().map((item, index) => (
+         <Card key={`${item.at}-${index}`} className={`border-l-4 ${getTraceBorderColor(item.kind)}`}>
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
@@ -82,6 +188,11 @@ export function TraceViewer({ items }: TraceViewerProps) {
                 {item.idx !== undefined && (
                   <Badge variant="outline" className="text-xs">
                     #{item.idx}
+                  </Badge>
+                )}
+                {item.eventId && (
+                  <Badge variant="outline" className="text-xs font-mono">
+                    {item.eventId.slice(0, 8)}...
                   </Badge>
                 )}
               </div>

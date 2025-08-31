@@ -59,6 +59,9 @@ export type TraceEvent = {
   kind: "plan" | "tool_call" | "observation" | "summary" | "error";
   payload: any;
   at: string; // ISO
+  eventId?: string; // ID único del evento para deduplicación
+  sessionId?: string; // ID de la sesión asociada
+  idx?: number; // Índice secuencial del evento
 };
 
 export type TraceStep = {
@@ -90,4 +93,28 @@ export type AnalyticsData = {
   toolCalls: { toolName: string; count: number }[];
   latency: { toolName: string; avgLatency: number }[];
   costs: { sessionId: string; cost: number; date: string }[];
+};
+
+// Nuevos tipos para el estado de sesión y eventos de SignalR
+export type SessionStatus = "connected" | "disconnected" | "connecting" | "reconnecting";
+
+export type SignalREvent = {
+  eventId: string; // ID único del evento
+  sessionId: string; // ID de la sesión
+  kind: TraceEvent["kind"];
+  payload: any;
+  at: string;
+  idx?: number;
+};
+
+export type SessionStatusEvent = {
+  sessionId: string;
+  status: SessionStatus;
+  timestamp: string;
+};
+
+export type HeartbeatEvent = {
+  sessionId: string;
+  timestamp: string;
+  connectionId?: string;
 };

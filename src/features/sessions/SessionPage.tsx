@@ -8,6 +8,8 @@ import { useTraceStream } from '@/hooks/useTraceStream'
 import { useTraceStore } from '@/store/traceStore'
 import { TraceViewer } from './TraceViewer'
 import { formatDate } from '@/lib/utils'
+import { ConnectionStatus } from '@/components/ConnectionStatus'
+import { EventDebugger } from '@/components/EventDebugger'
 import { 
   MessageSquare, 
   Activity, 
@@ -35,6 +37,11 @@ export function SessionPage() {
   const traces = useTraceStore((state) => 
     sessionId ? state.getSessionTraces(sessionId) : []
   )
+  
+  // Debug: ver qué trazas estamos obteniendo
+  console.log('🔍 SessionPage - sessionId:', sessionId);
+  console.log('🔍 SessionPage - traces del store:', traces);
+  console.log('🔍 SessionPage - total de traces:', traces.length);
 
   if (isLoading) {
     return (
@@ -90,6 +97,7 @@ export function SessionPage() {
           </div>
         </div>
         <div className="flex items-center space-x-2">
+          <ConnectionStatus sessionId={session.id} />
           <Badge variant={getStatusColor(session.status)}>
             {session.status}
           </Badge>
@@ -266,6 +274,11 @@ export function SessionPage() {
           </CardContent>
         </Card>
       </div>
+      
+      {/* Debug SignalR - Solo en desarrollo */}
+      {import.meta.env.DEV && (
+        <EventDebugger sessionId={session.id} />
+      )}
     </div>
   )
 }

@@ -33,11 +33,17 @@ export function AgentDetailPage() {
     enabled: !!agentId,
   })
 
-  const { data: bindings = [] } = useQuery({
+  const { data: bindings = [], isLoading: bindingsLoading, error: bindingsError } = useQuery({
     queryKey: ['bindings', agentId],
     queryFn: () => AgentApi.listBindings(agentId!),
     enabled: !!agentId,
   })
+
+  // Debug: ver qué bindings se están obteniendo
+  console.log('🔧 AgentDetailPage - agentId:', agentId)
+  console.log('🔧 AgentDetailPage - bindings obtenidos:', bindings)
+  console.log('🔧 AgentDetailPage - bindingsLoading:', bindingsLoading)
+  console.log('🔧 AgentDetailPage - bindingsError:', bindingsError)
 
   if (isLoading) {
     return (
@@ -139,7 +145,7 @@ export function AgentDetailPage() {
         </TabsContent>
 
         <TabsContent value="tools" className="mt-6">
-          <ToolsTab agent={agent} bindings={bindings} />
+          <ToolsTab agent={agent} bindings={bindings} isLoading={bindingsLoading} />
         </TabsContent>
 
         <TabsContent value="policy" className="mt-6">

@@ -18,17 +18,24 @@ export const AgentApi = {
   //   apiClient.delete<void>(`/agents/${id}`),
 
   // Gestión de bindings de herramientas
-  listBindings: (id: string) => 
-    apiClient.get<AgentToolBinding[]>(`/agents/${id}/bindings`),
+  listBindings: (id: string) => {
+    console.log('🔧 AgentApi.listBindings llamado con id:', id);
+    return apiClient.get<AgentToolBinding[]>(`/agents/${id}/bindings`);
+  },
     
   bindTool: (id: string, payload: { 
     toolId: string; 
     config?: any; 
     enabled: boolean 
-  }) => apiClient.post<AgentToolBinding>(`/agents/${id}/bindings`, payload),
+  }) => {
+    console.log('🔧 AgentApi.bindTool llamado con id:', id, 'payload:', payload);
+    return apiClient.post<AgentToolBinding>(`/agents/${id}/bindings`, payload);
+  },
     
-  unbindTool: (id: string, bindingId: string) => 
-    apiClient.delete<void>(`/agents/${id}/bindings/${bindingId}`),
+  unbindTool: (id: string, bindingId: string) => {
+    console.log('🔧 AgentApi.unbindTool llamado con id:', id, 'bindingId:', bindingId);
+    return apiClient.delete<void>(`/agents/${id}/bindings/${bindingId}`);
+  },
     
   // Nota: No existe PATCH /agents/{id}/bindings/{bindingId} en el backend
   // updateBinding: (id: string, bindingId: string, payload: Partial<AgentToolBinding>) =>

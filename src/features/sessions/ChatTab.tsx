@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -27,7 +27,7 @@ export function ChatTab({ agentId }: ChatTabProps) {
   const [input, setInput] = useState('')
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isTyping, setIsTyping] = useState(false)
-  const [processedTraceIds, setProcessedTraceIds] = useState<Set<string>>(new Set())
+
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const queryClient = useQueryClient()
 
@@ -40,7 +40,7 @@ export function ChatTab({ agentId }: ChatTabProps) {
     onSuccess: (data) => {
       setSession({ id: data.id, hubUrl: data.hubUrl, group: data.group })
       setMessages([]) // Limpiar mensajes al crear nueva sesión
-      setProcessedTraceIds(new Set()) // Limpiar trazas procesadas
+
       toast.success('Sesión creada correctamente')
     },
     onError: () => {
@@ -82,7 +82,7 @@ export function ChatTab({ agentId }: ChatTabProps) {
 
   // Obtener trazas en tiempo real
   const traces = useTraceStore((state) => 
-    session ? state.getSessionTraces(session.id) : []
+    session ? state.getSessionTraces(session.group) : []
   )
 
   // Auto-scroll al final de los mensajes
@@ -90,39 +90,63 @@ export function ChatTab({ agentId }: ChatTabProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  // Procesar trazas para generar mensajes
-  useEffect(() => {
-    if (!traces.length) return
+  // Ref para rastrear eventos ya procesados
+  const processedEventIds = useRef<Set<string>>(new Set())
+  
+  // Procesar trazas para generar mensajes usando useCallback para estabilidad
+  const processTraces = useCallback((newTraces: any[]) => {
+    if (!newTraces.length) return
 
-    const newMessages: ChatMessage[] = []
-    const newProcessedIds = new Set(processedTraceIds)
+    console.log('🔄 Procesando trazas:', newTraces.length)
     
-    traces.forEach((trace) => {
+    const newMessages: ChatMessage[] = []
+    
+    newTraces.forEach((trace) => {
       if (trace.kind === 'summary') {
-        const traceId = `summary-${trace.at}`
+        // Usar eventId para deduplicación
+        const eventId = trace.eventId || trace.id
         
-        // Solo procesar si no se ha procesado antes
-        if (!processedTraceIds.has(traceId)) {
-          const messageContent = trace.payload.content || trace.payload.summary || 'Respuesta del agente'
-          
+        if (processedEventIds.current.has(eventId)) {
+          console.log('⚠️ Evento ya procesado, ignorando:', eventId)
+          return
+        }
+        
+        const messageContent = trace.payload.content || trace.payload.summary || 'Respuesta del agente'
+        
+        // Verificar si ya existe un mensaje con el mismo contenido (doble verificación)
+        const existingMessage = messages.find(msg => 
+          msg.role === 'assistant' && 
+          msg.content === messageContent
+        )
+        
+        if (!existingMessage) {
+          console.log('✅ Nuevo mensaje agregado para evento:', eventId)
           newMessages.push({
-            id: `assistant-${trace.at}`,
+            id: `assistant-${eventId}`,
             role: 'assistant',
             content: messageContent,
             timestamp: trace.at,
           })
           
-          newProcessedIds.add(traceId)
+          // Marcar como procesado
+          processedEventIds.current.add(eventId)
           setIsTyping(false)
+        } else {
+          console.log('⚠️ Mensaje duplicado detectado, ignorando')
         }
       }
     })
 
     if (newMessages.length > 0) {
+      console.log('📨 Agregando', newMessages.length, 'nuevos mensajes')
       setMessages(prev => [...prev, ...newMessages])
-      setProcessedTraceIds(newProcessedIds)
     }
-  }, [traces, processedTraceIds])
+  }, [messages])
+
+  // useEffect que solo se ejecuta cuando cambian las trazas
+  useEffect(() => {
+    processTraces(traces)
+  }, [traces, processTraces])
 
   const handleSendMessage = () => {
     if (!input.trim() || !session) return
@@ -147,6 +171,8 @@ export function ChatTab({ agentId }: ChatTabProps) {
   }
 
   const handleCreateSession = () => {
+    // Limpiar eventos procesados para nueva sesión
+    processedEventIds.current.clear()
     createSessionMutation.mutate()
   }
 
@@ -189,7 +215,10 @@ export function ChatTab({ agentId }: ChatTabProps) {
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => setSession(null)}
+                  onClick={() => {
+                    processedEventIds.current.clear()
+                    setSession(null)
+                  }}
                 >
                   <RotateCcw className="h-4 w-4 mr-2" />
                   Nueva Sesión
@@ -209,7 +238,7 @@ export function ChatTab({ agentId }: ChatTabProps) {
         </div>
 
         {/* Mensajes */}
-        <div className="flex-1 overflow-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.map((message) => (
             <div
               key={message.id}
@@ -279,10 +308,12 @@ export function ChatTab({ agentId }: ChatTabProps) {
               Seguimiento detallado de la ejecución del agente
             </CardDescription>
           </CardHeader>
-          <CardContent className="h-[calc(100%-80px)] overflow-hidden">
-            {session ? (
-              <TraceViewer items={traces} />
-            ) : (
+                     <CardContent className="h-[calc(100%-80px)] p-0">
+             {session ? (
+               <div className="h-full overflow-y-auto" style={{ maxHeight: 'calc(100vh - 300px)' }}>
+                 <TraceViewer items={traces} />
+               </div>
+             ) : (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
                   <Activity className="h-12 w-12 text-muted-foreground mx-auto mb-4" />

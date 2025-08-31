@@ -15,19 +15,26 @@ import {
   Plus,
   Trash2,
   ToggleLeft,
-  ToggleRight
+  ToggleRight,
+  RefreshCw
 } from 'lucide-react'
 import type { Agent, AgentToolBinding, Tool, McpServer } from '@/types/domain'
 
 interface ToolsTabProps {
   agent: Agent
   bindings: AgentToolBinding[]
+  isLoading?: boolean
 }
 
-export function ToolsTab({ agent, bindings }: ToolsTabProps) {
+export function ToolsTab({ agent, bindings, isLoading }: ToolsTabProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedServer, setSelectedServer] = useState<string>('')
   const queryClient = useQueryClient()
+
+  // Debug: ver qué bindings estamos recibiendo
+  console.log('🔧 ToolsTab - agent:', agent)
+  console.log('🔧 ToolsTab - bindings recibidos:', bindings)
+  console.log('🔧 ToolsTab - total de bindings:', bindings.length)
 
   // Queries
   const { data: tools = [] } = useQuery({
@@ -54,12 +61,17 @@ export function ToolsTab({ agent, bindings }: ToolsTabProps) {
   })
 
   const unbindToolMutation = useMutation({
-    mutationFn: (bindingId: string) => AgentApi.unbindTool(agent.id, bindingId),
+    mutationFn: (bindingId: string) => {
+      console.log('🔧 ToolsTab - unbindToolMutation.mutate ejecutándose con bindingId:', bindingId);
+      return AgentApi.unbindTool(agent.id, bindingId);
+    },
     onSuccess: () => {
+      console.log('🔧 ToolsTab - unbindToolMutation onSuccess ejecutado');
       queryClient.invalidateQueries({ queryKey: ['bindings', agent.id] })
       toast.success('Herramienta desvinculada correctamente')
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('🔧 ToolsTab - unbindToolMutation onError ejecutado:', error);
       toast.error('Error al desvincular la herramienta')
     },
   })
@@ -77,19 +89,18 @@ export function ToolsTab({ agent, bindings }: ToolsTabProps) {
   //   },
   // })
 
-  // Filtrado de herramientas disponibles
+  // Filtrado de herramientas disponibles (mostrar todas, no filtrar las vinculadas)
   const availableTools = tools.filter(tool => {
-    const isBound = bindings.some(binding => binding.toolId === tool.id)
     const matchesSearch = tool.name.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesServer = !selectedServer || tool.mcpServerId === selectedServer
     
-    return !isBound && matchesSearch && matchesServer
+    return matchesSearch && matchesServer
   })
 
   // Agrupar herramientas por servidor
   const toolsByServer = availableTools.reduce((acc, tool) => {
-    const server = mcpServers.find(s => s.id === tool.mcpServerId)
-    const serverName = server?.name || 'Unknown Server'
+    // Usar serverName directamente de la herramienta en lugar de buscar en mcpServers
+    const serverName = tool.serverName || 'Unknown Server'
     
     if (!acc[serverName]) {
       acc[serverName] = []
@@ -98,11 +109,18 @@ export function ToolsTab({ agent, bindings }: ToolsTabProps) {
     return acc
   }, {} as Record<string, Tool[]>)
 
+  // Debug: ver qué herramientas tenemos (después de definirlas)
+  console.log('🔧 ToolsTab - tools totales:', tools)
+  console.log('🔧 ToolsTab - availableTools después del filtro:', availableTools)
+  console.log('🔧 ToolsTab - toolsByServer:', toolsByServer)
+
   const handleBindTool = (tool: Tool) => {
     bindToolMutation.mutate({ toolId: tool.id })
   }
 
   const handleUnbindTool = (bindingId: string) => {
+    console.log('🔧 ToolsTab - handleUnbindTool llamado con bindingId:', bindingId);
+    console.log('🔧 ToolsTab - bindings antes de desvincular:', bindings);
     unbindToolMutation.mutate(bindingId)
   }
 
@@ -159,31 +177,45 @@ export function ToolsTab({ agent, bindings }: ToolsTabProps) {
                     <Server className="h-4 w-4" />
                     {serverName}
                   </div>
-                  {serverTools.map((tool) => (
-                    <div
-                      key={tool.id}
-                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent cursor-pointer"
-                      onClick={() => handleBindTool(tool)}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <Wrench className="h-4 w-4 text-muted-foreground" />
-                        <div>
-                          <p className="text-sm font-medium">{tool.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {tool.description || 'Sin descripción'}
-                          </p>
+                  {serverTools.map((tool) => {
+                    const isBound = bindings.some(binding => binding.toolId === tool.id)
+                    
+                    return (
+                      <div
+                        key={tool.id}
+                        className={`flex items-center justify-between p-3 border rounded-lg ${
+                          isBound 
+                            ? 'bg-green-50 border-green-200 cursor-not-allowed' 
+                            : 'hover:bg-accent cursor-pointer'
+                        }`}
+                        onClick={isBound ? undefined : () => handleBindTool(tool)}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <Wrench className={`h-4 w-4 ${isBound ? 'text-green-600' : 'text-muted-foreground'}`} />
+                          <div>
+                            <p className="text-sm font-medium">{tool.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {tool.description || 'Sin descripción'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          {tool.scope && (
+                            <Badge variant="outline" className="text-xs">
+                              {tool.scope}
+                            </Badge>
+                          )}
+                          {isBound ? (
+                            <Badge variant="outline" className="text-xs bg-green-100 text-green-800 border-green-300">
+                              Vinculada
+                            </Badge>
+                          ) : (
+                            <Plus className="h-4 w-4 text-muted-foreground" />
+                          )}
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        {tool.scope && (
-                          <Badge variant="outline" className="text-xs">
-                            {tool.scope}
-                          </Badge>
-                        )}
-                        <Plus className="h-4 w-4 text-muted-foreground" />
-                      </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               ))}
               
@@ -208,15 +240,33 @@ export function ToolsTab({ agent, bindings }: ToolsTabProps) {
       <div className="col-span-5">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="h-5 w-5" />
-              Toolbox del Agente
-            </CardTitle>
-            <CardDescription>
-              Herramientas vinculadas a este agente
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  Toolbox del Agente
+                </CardTitle>
+                <CardDescription>
+                  Herramientas vinculadas a este agente
+                </CardDescription>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => queryClient.invalidateQueries({ queryKey: ['bindings', agent.id] })}
+                disabled={isLoading}
+              >
+                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
+            {isLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-muted-foreground">Cargando herramientas vinculadas...</p>
+              </div>
+            ) : (
             <div className="space-y-3">
               {bindings.map((binding) => {
                 const tool = tools.find(t => t.id === binding.toolId)
@@ -287,6 +337,7 @@ export function ToolsTab({ agent, bindings }: ToolsTabProps) {
                 </div>
               )}
             </div>
+            )}
           </CardContent>
         </Card>
       </div>
