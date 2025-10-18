@@ -1,290 +1,170 @@
-# AutoAgentes Frontend
+# AutoAgent Frontend
 
-Frontend para la plataforma AutoAgentes - Gestión de Agentes IA con herramientas MCP.
+Frontend para la aplicación AutoAgent con soporte completo para markdown en el chat.
 
-## 🚀 Características
+## 🚀 Características Principales
 
-- **Gestión de Agentes**: Crear, configurar y gestionar agentes de IA
-- **MCP Servers**: Configurar servidores MCP y descubrir herramientas
-- **Chat en Tiempo Real**: Conversar con agentes con trazas estructuradas
-- **Trace Viewer**: Visualización en tiempo real de la ejecución de agentes
-- **Analytics**: Métricas y gráficos de uso y rendimiento
-- **Drag & Drop**: Gestión visual de herramientas por agentes
-- **SignalR**: Comunicación en tiempo real con el backend
+### **Chat con Soporte Completo de Markdown**
+Las respuestas del agente ahora soportan formato markdown completo y profesional:
 
-## 🛠️ Stack Tecnológico
+#### 📝 **Markdown Básico**
+- **Encabezados**: H1, H2, H3, H4, H5, H6 con estilos jerárquicos
+- **Formato de texto**: Negrita, cursiva, tachado, subíndices, superíndices
+- **Listas**: Ordenadas, no ordenadas y anidadas
+- **Enlaces**: Internos y externos con estilos de hover
+- **Párrafos**: Con espaciado y tipografía optimizados
+
+#### 💻 **Código y Sintaxis**
+- **Código inline**: `código` con fondo y bordes redondeados
+- **Bloques de código**: Con identificador de lenguaje y scroll horizontal
+- **Resaltado de sintaxis**: Soporte para Python, JavaScript, SQL, TypeScript, etc.
+- **Preformateado**: Bloques `<pre>` con estilos personalizados
+
+#### 📊 **Elementos Estructurados**
+- **Tablas**: Responsivas con bordes, hover effects y scroll horizontal
+- **Citas**: Con borde izquierdo, fondo y estilos tipográficos
+- **Separadores**: Líneas horizontales con espaciado
+- **Imágenes**: Responsive con bordes y estilos adaptativos
+
+#### 🎯 **GitHub Flavored Markdown (GFM)**
+- **Listas de tareas**: Checkboxes interactivos
+- **Strikethrough**: Texto tachado con estilos
+- **Enlaces automáticos**: Detección automática de URLs
+- **Tablas avanzadas**: Con alineación y estilos mejorados
+
+#### 🎨 **Estilos Personalizados**
+- **Tema adaptativo**: Soporte completo para modo claro y oscuro
+- **Colores consistentes**: Integración con tu sistema de diseño
+- **Responsive design**: Adaptable a todos los tamaños de pantalla
+- **Hover effects**: Transiciones suaves y efectos interactivos
+- **Tipografía optimizada**: Espaciado y legibilidad mejorados
+
+## 🛠️ Tecnologías Implementadas
 
 - **React 18** + **TypeScript** + **Vite**
-- **React Router v6** para routing
-- **TanStack Query** para cache de datos
-- **Zustand** para estado UI
-- **SignalR** para comunicación en tiempo real
-- **Tailwind CSS** + **shadcn/ui** para UI
-- **Recharts** para gráficos
-- **Lucide React** para iconos
+- **React Markdown**: Renderizado de markdown
+- **Remark GFM**: GitHub Flavored Markdown
+- **Remark Breaks**: Saltos de línea automáticos
+- **Remark Math**: Soporte para matemáticas
+- **Rehype Katex**: Renderizado de fórmulas matemáticas
+- **Rehype Highlight**: Resaltado de sintaxis de código
+- **Tailwind CSS**: Estilos y diseño responsivo
+- **shadcn/ui**: Componentes de UI modernos
 
 ## 📦 Instalación
 
-1. **Clonar el repositorio**
-```bash
-git clone <repository-url>
-cd autoagentes-frontend
-```
-
-2. **Instalar dependencias**
 ```bash
 npm install
 ```
 
-3. **Configurar variables de entorno**
-```bash
-cp .env.example .env
-```
+## 🚀 Desarrollo
 
-Editar `.env` con tu configuración:
-```env
-VITE_API_BASE_URL=http://localhost:5000
-VITE_API_KEY=your-dev-api-key-here
-VITE_SIGNALR_HUB_URL=http://localhost:5000/hubs/trace
-```
-
-4. **Ejecutar en desarrollo**
 ```bash
 npm run dev
 ```
 
-La aplicación estará disponible en `http://localhost:3000`
-
-## 🏗️ Estructura del Proyecto
-
-```
-src/
-├── app/                    # Composición de rutas y layout
-├── components/             # UI atómica (cards, tables, dialogs)
-├── features/
-│   ├── agents/            # Páginas + hooks + servicios de agentes
-│   ├── mcp/               # Servidores MCP y tools
-│   ├── sessions/          # Chat y trace viewer
-│   └── analytics/         # Paneles y charts
-├── hooks/                 # Hooks compartidos (SignalR, DnD)
-├── lib/                   # apiClient, queryClient, validators, utils
-├── store/                 # Zustand stores (UI state)
-├── types/                 # DTOs TS alineados con el backend
-└── styles/                # tailwind.css + tokens
-```
-
-## 🎯 Funcionalidades Principales
-
-### Dashboard
-- Resumen de agentes activos
-- Sesiones recientes
-- Métricas de consumo
-- Estado de servidores MCP
-
-### Gestión de Agentes
-- Listado con filtros y búsqueda
-- Creación y configuración de agentes
-- Gestión de herramientas por drag & drop
-- Configuración de políticas de guardrails
-- Chat integrado con trace viewer
-
-### MCP Servers
-- Configuración de servidores MCP
-- Descubrimiento automático de herramientas
-- Prueba de conectividad
-- Gestión de herramientas disponibles
-
-### Chat y Trazas
-- Chat en tiempo real con agentes
-- Visualización de trazas estructuradas
-- Control de sesiones (pausar/reanudar)
-- Retry de pasos fallidos
-
-### Analytics
-- Métricas de uso por agente
-- Gráficos de costes y latencias
-- Análisis de herramientas más usadas
-- Historial de sesiones
-
-## 🔧 Scripts Disponibles
+## 🏗️ Build
 
 ```bash
-# Desarrollo
-npm run dev
-
-# Build de producción
 npm run build
-
-# Preview del build
-npm run preview
-
-# Linting
-npm run lint
-
-# Tests
-npm run test
-npm run test:ui
-
-# Tests E2E
-npm run test:e2e
 ```
 
-## 🌐 Rutas de la Aplicación
+## 🎯 Cómo Funciona el Markdown
 
-- `/` - Dashboard principal
-- `/agents` - Listado de agentes
-- `/agents/:id` - Detalle del agente con pestañas
-- `/mcp` - Gestión de servidores MCP
-- `/sessions/:id` - Vista de sesión individual
-- `/settings` - Configuración de la aplicación
+### **Para el Usuario**
+1. Escribe tu mensaje normalmente (sin markdown)
+2. El agente responde con contenido formateado
+3. El markdown se renderiza automáticamente
 
-## 🔌 Integración con Backend
+### **Para el Agente**
+El agente puede usar toda la sintaxis markdown:
 
-El frontend se integra con el backend a través de:
+```markdown
+# Título Principal
 
-1. **API REST**: Para operaciones CRUD
-2. **SignalR**: Para trazas en tiempo real
-3. **WebSockets**: Para comunicación bidireccional
+## Análisis del Código
 
-### Configuración del Backend
+He revisado tu implementación y encontré algunos **problemas críticos**:
 
-Crea un archivo `.env` en la raíz del proyecto:
+### Problemas Identificados:
+- ❌ Variable no inicializada
+- ⚠️ Falta validación de entrada
+- ✅ La lógica principal está correcta
 
-```bash
-# Configuración del backend
-VITE_API_BASE_URL=http://localhost:5000/api
+### Solución Recomendada:
 
-# Configuración de desarrollo
-VITE_DEV_MODE=true
+```python
+def funcion_mejorada():
+    # Inicializar variables
+    resultado = 0
+    
+    # Validar entrada
+    if entrada_valida:
+        resultado = procesar_datos()
+    
+    return resultado
 ```
 
-**Nota importante**: Asegúrate de que el backend esté ejecutándose en la URL especificada antes de usar el frontend.
+### Métricas de Rendimiento:
 
-### Endpoints Disponibles
+| Métrica | Valor | Estado |
+|---------|-------|--------|
+| Precisión | 95.2% | ✅ Excelente |
+| Latencia | 150ms | ⚠️ Mejorable |
 
-Según el Swagger del backend, estos son los endpoints disponibles:
-
-- `GET /agents` - Listar agentes
-- `POST /agents` - Crear agente
-- `GET /agents/:id` - Obtener agente
-- `PATCH /agents/:id` - Actualizar agente
-- `GET /agents/:id/bindings` - Listar bindings
-- `POST /agents/:id/bindings` - Crear binding
-- `DELETE /agents/:id/bindings/:bindingId` - Eliminar binding
-- `POST /sessions` - Crear sesión
-- `GET /sessions/:id` - Obtener sesión
-- `POST /sessions/:id/messages` - Enviar mensaje
-- `GET /sessions/:id/trace` - Obtener trazas
-- `POST /sessions/:id:pause` - Pausar sesión
-- `POST /sessions/:id:resume` - Reanudar sesión
-- `POST /sessions/:id:cancel` - Cancelar sesión
-- `POST /sessions/:id:retryLastStep` - Reintentar último paso
-- `GET /mcp/servers` - Listar servidores MCP
-- `POST /mcp/servers` - Crear servidor MCP
-- `POST /mcp/servers/:id/discover` - Descubrir herramientas
-- `GET /mcp/tools` - Listar herramientas (con query param serverId)
-
-## 🎨 Temas y Personalización
-
-La aplicación soporta:
-- Tema claro/oscuro/sistema
-- Personalización de colores
-- Configuración de notificaciones
-- Preferencias de usuario
-
-## 🧪 Testing
-
-```bash
-# Tests unitarios
-npm run test
-
-# Tests con UI
-npm run test:ui
-
-# Tests E2E con Playwright
-npm run test:e2E
+> **Nota importante**: Siempre valida las entradas antes de procesarlas.
 ```
 
-## 📦 Build y Despliegue
+## 🔍 Ejemplos de Uso Real
 
-```bash
-# Build de producción
-npm run build
+### **Respuesta con Código**
+- Análisis de código con resaltado de sintaxis
+- Explicaciones técnicas con formato estructurado
+- Recomendaciones organizadas en listas
 
-# El resultado estará en /dist
-```
+### **Respuesta con Datos**
+- Tablas de métricas y resultados
+- Gráficos descritos con markdown
+- Estadísticas organizadas y legibles
 
-### Despliegue en Vercel
+### **Respuesta con Instrucciones**
+- Pasos numerados y organizados
+- Listas de verificación interactivas
+- Enlaces a recursos externos
 
-1. Conectar repositorio a Vercel
-2. Configurar variables de entorno
-3. Deploy automático en cada push
+## 🎨 Personalización de Estilos
 
-### Despliegue en Azure Static Web Apps
+Los estilos están completamente personalizables en `src/styles/globals.css`:
 
-1. Configurar GitHub Actions
-2. Definir variables de entorno
-3. Deploy automático
+- **Colores**: Integrados con tu sistema de diseño
+- **Tipografía**: Espaciado y tamaños optimizados
+- **Responsive**: Adaptable a todos los dispositivos
+- **Temas**: Soporte para modo claro y oscuro
+
+## 🚀 Próximas Funcionalidades
+
+- [ ] Resaltado de sintaxis avanzado con Prism.js
+- [ ] Soporte completo para matemáticas LaTeX
+- [ ] Diagramas con Mermaid
+- [ ] Emojis y iconos personalizados
+- [ ] Exportación a PDF/HTML
+
+## 📚 Documentación
+
+- **`MARKDOWN_DEMO.md`**: Demostración completa de todas las funcionalidades
+- **`src/styles/globals.css`**: Estilos personalizados para markdown
+- **`src/features/sessions/ChatTab.tsx`**: Implementación del componente
 
 ## 🤝 Contribución
 
 1. Fork el proyecto
-2. Crear rama feature (`git checkout -b feature/AmazingFeature`)
-3. Commit cambios (`git commit -m 'Add AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abrir Pull Request
+2. Crea una rama feature (`git checkout -b feature/NuevaFuncionalidad`)
+3. Commit tus cambios (`git commit -m 'Agregar nueva funcionalidad'`)
+4. Push a la rama (`git push origin feature/NuevaFuncionalidad`)
+5. Abre un Pull Request
 
-## 📄 Licencia
+---
 
-Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
+**¡El soporte de markdown en AutoAgent está completamente funcional y listo para usar!** 🎉
 
-## 🆘 Soporte
-
-Para soporte y preguntas:
-- Crear issue en GitHub
-- Contactar al equipo de desarrollo
-- Revisar la documentación del backend
-
-## ⚠️ Limitaciones Actuales
-
-### Endpoints No Disponibles en el Backend
-Algunas funcionalidades están comentadas porque los endpoints no existen en el backend actual:
-
-- **MCP Servers**: 
-  - ❌ `GET /mcp/servers/{id}` - Obtener servidor específico
-  - ❌ `PATCH /mcp/servers/{id}` - Actualizar servidor
-  - ❌ `DELETE /mcp/servers/{id}` - Eliminar servidor
-  - ❌ `POST /mcp/servers/{id}/test` - Probar conexión
-
-- **Tools**:
-  - ❌ `GET /mcp/tools/{id}` - Obtener herramienta específica
-  - ❌ `PATCH /mcp/tools/{id}` - Actualizar herramienta
-  - ❌ `POST /mcp/tools/{id}/enable` - Habilitar/deshabilitar herramienta
-
-- **Agents**:
-  - ❌ `DELETE /agents/{id}` - Eliminar agente
-  - ❌ `PATCH /agents/{id}/bindings/{bindingId}` - Actualizar binding
-
-- **Sessions**:
-  - ❌ `GET /sessions` - Listar sesiones
-  - ❌ `GET /sessions/{id}/trace/{stepId}` - Obtener paso específico
-
-### Funcionalidades Comentadas
-- Botones de "Probar conexión" y "Eliminar servidor" en MCP
-- Toggle de habilitar/deshabilitar herramientas
-- Listado de sesiones en Dashboard y Analytics
-- Actualización de bindings de herramientas
-
-## 🗺️ Roadmap
-
-### v0.2 - Funcionalidades Avanzadas
-- [ ] Drag & Drop avanzado para herramientas
-- [ ] Editor Monaco para políticas
-- [ ] Templates AIFoundry
-- [ ] Exportación de datos
-- [ ] Modo offline
-- [ ] PWA
-- [ ] Tests E2E completos
-- [ ] Internacionalización (i18n)
-- [ ] Temas personalizables
-- [ ] Dashboard personalizable
+Ahora puedes disfrutar de respuestas del agente con formato profesional, código resaltado, tablas organizadas y mucho más.

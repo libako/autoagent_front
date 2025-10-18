@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useState, useCallback, useRef, useEffect } from 'react'
+import { useAutoScroll, useAutoScrollEffect } from '@/hooks/useAutoScroll'
+import { useMutation } from '@tanstack/react-query'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { SessionApi } from './sessionApi'
@@ -8,7 +9,6 @@ import { useTraceStore } from '@/store/traceStore'
 import { TraceViewer } from './TraceViewer'
 import { toast } from 'sonner'
 import { 
-  MessageSquare, 
   Send, 
   Play, 
   Pause,
@@ -17,9 +17,77 @@ import {
 } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 import type { ChatMessage } from '@/types/domain'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import rehypeHighlight from 'rehype-highlight'
 
 interface ChatTabProps {
   agentId: string
+}
+
+// Función para desenvolver fence global de markdown
+function unwrapTopLevelMarkdownFence(s: string): string {
+  console.log('🔍 unwrapTopLevelMarkdownFence - Input:', s.substring(0, 100) + '...');
+  
+  // Solo remover si el contenido está COMPLETAMENTE envuelto en un fence markdown
+  const trimmed = s.trim();
+  const markdownFenceRegex = /^```markdown\s*([\s\S]*?)\s*```$/;
+  const genericFenceRegex = /^```\s*([\s\S]*?)\s*```$/;
+  
+  // Primero intentar con fence específico de markdown
+  let match = trimmed.match(markdownFenceRegex);
+  if (match) {
+    console.log('✅ Fence markdown detectado y removido');
+    return match[1];
+  }
+  
+  // Si no, intentar con fence genérico solo si el contenido parece ser markdown
+  match = trimmed.match(genericFenceRegex);
+  if (match) {
+    const content = match[1];
+    // Solo remover si el contenido parece ser markdown (empieza con # o tiene elementos markdown)
+    if (content.trim().startsWith('#') || content.includes('##') || content.includes('**') || content.includes('*')) {
+      console.log('✅ Fence genérico con contenido markdown detectado y removido');
+      return content;
+    }
+  }
+  
+  console.log('❌ No se detectó fence global, devolviendo original');
+  return s;
+}
+
+// Función para extraer contenido de JSON
+function extractContentFromJson(content: string): string {
+  console.log('🔍 extractContentFromJson - Input completo:', content);
+  try {
+    const parsed = JSON.parse(content);
+    console.log('📦 JSON parseado:', parsed);
+    if (parsed && typeof parsed === 'object' && parsed.content) {
+      console.log('✅ Contenido extraído del JSON:', parsed.content);
+      return parsed.content;
+    } else {
+      console.log('⚠️ JSON válido pero sin propiedad content');
+    }
+  } catch (error) {
+    console.log('❌ No es JSON válido, error:', error);
+  }
+  console.log('🔄 Devolviendo contenido original');
+  return content;
+}
+
+// Función para normalizar contenido
+function normalizeContent(content: string): string {
+  console.log('🚨 normalizeContent - Input:', content.substring(0, 100) + '...');
+  
+  // Primero extraer contenido del JSON si es necesario
+  const extractedContent = extractContentFromJson(content);
+  
+  // Quitar BOM y normalizar saltos de línea
+  const normalized = String(extractedContent).replace(/^\uFEFF/, '').replace(/\r\n/g, '\n');
+  // Desenvolver fence global si existe
+  const result = unwrapTopLevelMarkdownFence(normalized);
+  console.log('📝 normalizeContent - Output:', result.substring(0, 100) + '...');
+  return result;
 }
 
 export function ChatTab({ agentId }: ChatTabProps) {
@@ -28,8 +96,11 @@ export function ChatTab({ agentId }: ChatTabProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isTyping, setIsTyping] = useState(false)
 
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const queryClient = useQueryClient()
+  const messagesEndRef = useAutoScroll<HTMLDivElement>({ 
+    behavior: 'smooth', 
+    delay: 100,
+    enabled: true 
+  })
 
   // Conectar al stream de trazas usando el group devuelto por la API
   useTraceStream(import.meta.env.VITE_SIGNALR_HUB_URL, session?.group ?? null)
@@ -86,9 +157,22 @@ export function ChatTab({ agentId }: ChatTabProps) {
   )
 
   // Auto-scroll al final de los mensajes
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  useAutoScrollEffect(messagesEndRef, [messages], { 
+    behavior: 'smooth', 
+    delay: 50 
+  })
+
+  // Scroll adicional cuando cambia la cantidad de mensajes
+  useAutoScrollEffect(messagesEndRef, [messages.length], { 
+    behavior: 'smooth', 
+    delay: 100 
+  })
+
+  // Scroll adicional cuando cambia el estado de typing
+  useAutoScrollEffect(messagesEndRef, [isTyping], { 
+    behavior: 'smooth', 
+    delay: 200 
+  })
 
   // Ref para rastrear eventos ya procesados
   const processedEventIds = useRef<Set<string>>(new Set())
@@ -160,6 +244,8 @@ export function ChatTab({ agentId }: ChatTabProps) {
     }
     setMessages(prev => [...prev, userMessage])
 
+    // El scroll automático se maneja con el hook useAutoScroll
+
     sendMessageMutation.mutate(input)
   }
 
@@ -169,6 +255,7 @@ export function ChatTab({ agentId }: ChatTabProps) {
       handleSendMessage()
     }
   }
+
 
   const handleCreateSession = () => {
     // Limpiar eventos procesados para nueva sesión
@@ -225,20 +312,59 @@ export function ChatTab({ agentId }: ChatTabProps) {
                 </Button>
               </>
             ) : (
-              <Button
-                size="sm"
-                onClick={handleCreateSession}
-                disabled={createSessionMutation.isPending}
-              >
-                <Play className="h-4 w-4 mr-2" />
-                Crear Sesión
-              </Button>
+                                <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={handleCreateSession}
+                      disabled={createSessionMutation.isPending}
+                    >
+                      <Play className="h-4 w-4 mr-2" />
+                      Crear Sesión
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        // Agregar un mensaje de prueba del agente
+                        const testMessage: ChatMessage = {
+                          id: `test-${Date.now()}`,
+                          role: 'assistant',
+                          content: JSON.stringify({
+                            content: "# Título de Prueba\n\n## Subtítulo\n\nEste es un **párrafo** con *formato*.\n\n### Lista:\n- Elemento 1\n- Elemento 2\n- Elemento 3\n\n### Código:\n```python\ndef hola():\n    print('Hola Mundo')\n```\n\n### Tabla:\n| Col1 | Col2 |\n|------|------|\n| A    | B    |"
+                          }),
+                          timestamp: new Date().toISOString(),
+                        }
+                        setMessages(prev => [...prev, testMessage])
+                      }}
+                    >
+                      🧪 Probar Markdown (JSON)
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        // Agregar un mensaje de prueba del agente con markdown completo
+                        const testMessage: ChatMessage = {
+                          id: `test-complete-${Date.now()}`,
+                          role: 'assistant',
+                          content: "# Título Principal\n\n## Subtítulo\n\nEste es un **párrafo** con *formato* y `código inline`.\n\n### Lista Desordenada\n- Elemento 1\n- Elemento 2\n- Elemento 3\n\n### Lista Ordenada\n1. Primer elemento\n2. Segundo elemento\n3. Tercer elemento\n\n### Código Python\n```python\ndef hola_mundo():\n    print('¡Hola desde Python!')\n    return 'Éxito'\n```\n\n### Enlace\n[Visita Google](https://www.google.com)\n\n### Cita\n> Esta es una cita importante que demuestra el formato de blockquote.\n\n### Tabla\n| Campo | Valor |\n|-------|-------|\n| Nombre | Agente |\n| Tipo | IA |\n| Estado | Activo |",
+                          timestamp: new Date().toISOString(),
+                        }
+                        setMessages(prev => [...prev, testMessage])
+                      }}
+                    >
+                      🧪 Probar Markdown Completo
+                    </Button>
+                  </div>
             )}
           </div>
         </div>
 
         {/* Mensajes */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div 
+          className="flex-1 overflow-y-auto p-4 space-y-4" 
+          style={{ maxHeight: 'calc(100vh - 400px)' }}  
+        >
           {messages.map((message) => (
             <div
               key={message.id}
@@ -251,7 +377,31 @@ export function ChatTab({ agentId }: ChatTabProps) {
                     : 'bg-muted'
                 }`}
               >
-                <p className="text-sm">{message.content}</p>
+                {message.role === 'user' ? (
+                  <p className="text-sm">{message.content}</p>
+                ) : (
+                  <div className="markdown-content">
+                    <div>
+                      <div style={{display: 'none'}}>
+                        DEBUG: {JSON.stringify(message.content)}
+                      </div>
+                      <div className="prose max-w-none">
+                        {(() => {
+                          const processedContent = normalizeContent(message.content);
+                          console.log('🎯 ReactMarkdown recibiendo:', processedContent);
+                          return (
+                            <ReactMarkdown
+                              remarkPlugins={[remarkGfm]}
+                              rehypePlugins={[rehypeHighlight]}
+                            >
+                              {processedContent}
+                            </ReactMarkdown>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <p className="text-xs opacity-70 mt-1">
                   {formatDate(message.timestamp)}
                 </p>
@@ -271,6 +421,26 @@ export function ChatTab({ agentId }: ChatTabProps) {
           )}
           
           <div ref={messagesEndRef} />
+          
+          {/* Indicador de scroll automático y botón para ir al final */}
+          {messages.length > 0 && (
+            <div className="flex justify-center pt-2 space-x-2">
+              <div className="text-xs text-muted-foreground flex items-center gap-1">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                Scroll automático activo
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+                }}
+                className="text-xs"
+              >
+                Ir al final
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Input */}

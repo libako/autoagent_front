@@ -57,3 +57,248 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Estilos personalizados para markdown */
+.markdown-content {
+  @apply text-sm leading-relaxed;
+}
+
+.markdown-content h1 {
+  @apply text-xl font-bold mb-3 text-foreground border-b border-border pb-2;
+}
+
+.markdown-content h2 {
+  @apply text-lg font-bold mb-2 text-foreground;
+}
+
+.markdown-content h3 {
+  @apply text-base font-bold mb-2 text-foreground;
+}
+
+.markdown-content h4 {
+  @apply text-sm font-bold mb-1 text-foreground;
+}
+
+.markdown-content h5 {
+  @apply text-sm font-semibold mb-1 text-foreground;
+}
+
+.markdown-content h6 {
+  @apply text-sm font-semibold mb-1 text-foreground;
+}
+
+.markdown-content p {
+  @apply mb-3 text-foreground leading-relaxed;
+}
+
+.markdown-content ul {
+  @apply list-disc list-inside mb-3 space-y-1 ml-4;
+}
+
+.markdown-content ol {
+  @apply list-decimal list-inside mb-3 space-y-1 ml-4;
+}
+
+.markdown-content li {
+  @apply text-foreground;
+}
+
+.markdown-content li > ul,
+.markdown-content li > ol {
+  @apply mt-1 ml-4;
+}
+
+.markdown-content blockquote {
+  @apply border-l-4 border-primary pl-4 py-2 mb-3 bg-muted/50 italic text-foreground rounded-r;
+}
+
+.markdown-content blockquote p {
+  @apply mb-0;
+}
+
+.markdown-content code {
+  @apply bg-muted px-1.5 py-0.5 rounded text-sm font-mono text-foreground;
+}
+
+.markdown-content pre {
+  @apply bg-muted p-3 rounded-lg mb-3 overflow-x-auto;
+}
+
+.markdown-content pre code {
+  @apply bg-transparent p-0;
+}
+
+.markdown-content table {
+  @apply min-w-full border border-border text-xs mb-3 rounded-lg overflow-hidden;
+}
+
+.markdown-content thead {
+  @apply bg-muted;
+}
+
+.markdown-content th {
+  @apply border border-border px-3 py-2 text-left font-semibold text-foreground bg-muted;
+}
+
+.markdown-content td {
+  @apply border border-border px-3 py-2 text-foreground;
+}
+
+.markdown-content tr:hover {
+  @apply bg-muted/50;
+}
+
+.markdown-content a {
+  @apply text-primary hover:text-primary/80 underline decoration-primary/30 hover:decoration-primary transition-colors;
+}
+
+.markdown-content strong {
+  @apply font-bold text-foreground;
+}
+
+.markdown-content em {
+  @apply italic text-foreground;
+}
+
+.markdown-content del,
+.markdown-content s {
+  @apply line-through text-muted-foreground;
+}
+
+.markdown-content hr {
+  @apply border-border my-4;
+}
+
+.markdown-content img {
+  @apply max-w-full h-auto rounded-lg border border-border my-3;
+}
+
+.markdown-content sub {
+  @apply text-xs text-foreground;
+}
+
+.markdown-content sup {
+  @apply text-xs text-foreground;
+}
+
+/* Estilos para listas de tareas (checkboxes) */
+.markdown-content input[type="checkbox"] {
+  @apply mr-2 h-4 w-4 text-primary border-border rounded focus:ring-primary;
+}
+
+/* Estilos para código con resaltado de sintaxis */
+.markdown-content .code-block {
+  @apply bg-muted rounded-lg mb-3 overflow-hidden;
+}
+
+.markdown-content .code-header {
+  @apply bg-muted-foreground/10 px-3 py-1 text-xs font-mono text-muted-foreground border-b border-border;
+}
+
+/* Estilos para tablas responsivas */
+.markdown-content .table-container {
+  @apply overflow-x-auto mb-3;
+}
+
+/* Estilos para enlaces internos */
+.markdown-content a[href^="#"] {
+  @apply text-foreground hover:text-primary;
+}
+
+/* Estilos para código inline vs bloques */
+.markdown-content code:not(pre code) {
+  @apply bg-muted px-1.5 py-0.5 rounded text-sm font-mono text-foreground;
+}
+
+/* Estilos para listas anidadas */
+.markdown-content ul ul,
+.markdown-content ol ol,
+.markdown-content ul ol,
+.markdown-content ol ul {
+  @apply mt-1 ml-4;
+}
+
+/* Estilos para elementos de lista con contenido mixto */
+.markdown-content li > p {
+  @apply mb-1;
+}
+
+.markdown-content li > ul,
+.markdown-content li > ol {
+  @apply mt-1;
+}
+
+/* Estilos para elementos de lista vacíos */
+.markdown-content li:empty {
+  @apply hidden;
+}
+
+/* Estilos para enlaces de imagen */
+.markdown-content a img {
+  @apply border-primary/30 hover:border-primary transition-colors;
+}
+
+/* Estilos para elementos de código con scroll horizontal */
+.markdown-content pre {
+  @apply overflow-x-auto;
+}
+
+/* Estilos para elementos de tabla con scroll horizontal */
+.markdown-content .table-container {
+  @apply overflow-x-auto;
+}
+
+/* Estilos para elementos de markdown en modo oscuro */
+.dark .markdown-content {
+  @apply text-foreground;
+}
+
+.dark .markdown-content code {
+  @apply bg-muted text-foreground;
+}
+
+.dark .markdown-content pre {
+  @apply bg-muted;
+}
+
+.dark .markdown-content blockquote {
+  @apply bg-muted/30 border-primary/70;
+}
+
+.dark .markdown-content table {
+  @apply border-border;
+}
+
+.dark .markdown-content th {
+  @apply bg-muted border-border;
+}
+
+.dark .markdown-content td {
+  @apply border-border;
+}
+
+/* Estilos para elementos de markdown en modo claro */
+.markdown-content {
+  @apply text-foreground;
+}
+
+/* Estilos para elementos de markdown con hover */
+.markdown-content a:hover {
+  @apply text-primary/80;
+}
+
+.markdown-content tr:hover {
+  @apply bg-muted/30;
+}
+
+/* Estilos para elementos de markdown con focus */
+.markdown-content a:focus {
+  @apply outline-none ring-2 ring-primary ring-offset-2 rounded;
+}
+
+/* Estilos para elementos de markdown con transiciones */
+.markdown-content a,
+.markdown-content tr,
+.markdown-content img {
+  @apply transition-all duration-200;
+}
